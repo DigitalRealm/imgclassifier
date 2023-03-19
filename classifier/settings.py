@@ -10,8 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
+import io
 import os
-from pathlib import Path
+import json
+
+from torchvision import models
 
 def environment(key: str, default=None):
     value = os.environ.get(key)
@@ -20,7 +23,7 @@ def environment(key: str, default=None):
     return default
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 # Quick-start development settings - unsuitable for production
@@ -62,7 +65,9 @@ ROOT_URLCONF = 'classifier.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            BASE_DIR,
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -128,8 +133,22 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'frontend', 'static')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# PyTorch Model Settings
+
+# Load image classification model
+CLASS_MODEL = models.densenet121(pretrained=True)
+CLASS_MODEL.eval()
+
+# Load classification labels
+CLASS_MODEL_LABEL_PATH = os.path.join(STATIC_ROOT, "imagenet_class_index.json")
+CLASS_MODEL_MAPPING = json.load(open(CLASS_MODEL_LABEL_PATH))
+
+
+
